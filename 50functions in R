@@ -1,0 +1,109 @@
+# Data Input
+getwd()
+setwd("D:/insofe/R projects/Self study/50functions in R")
+a <- read.csv("sample.csv",header = T,sep = ",")
+dir()
+
+# Object Inspection
+str(a)
+names(a)
+class(a)
+dim(a)
+nrow(a)
+ncol(a)
+length(a)
+a[27,4]
+a$Relationship
+
+# Data Inspection
+head(a,10)
+tail(a,20)
+
+b = a[sample(nrow(a),replace = F,size =0.01*nrow(a)),] # replace=F means only one time picked without replacement
+
+# Math functions
+log(10)
+head(b[,"Age"])
+cumsum(head(b[,"Age"]))
+diff(head(b[,"Age"]))
+lag
+
+# Data Manipulation
+
+b$Education = paste(b$Education)  # converts Education from Factor/Numeric variable to Charachter Variable
+b$Education = as.numeric(b$Education)
+is.na(b)
+na.omit(b)
+na.rm = T # this option allows you to calculate values ignoring Missing Values
+nchar(b$Education)
+substr("nirmeshpatel",1,4)
+
+# to split last 2 characters
+b$Raace = paste(b$Raace)
+for(i in 1:nrow(b))
+{
+  b$Raace[i] = substr(b$Raace[i],nchar(b$Raace[i])-1,nchar(b$Raace[i]))
+}
+
+# Data Analysis
+summary(a)
+table(b$Marital.Status,b$Sex)
+
+table(b$Marital.Status,b$Sex,b$Raace)
+ftable(b$Marital.Status,b$Sex,b$Raace)  # flat table reduces 3D to 2D!
+
+library(Hmisc)
+describe(b$Age)
+summarize(b$Age,b$CapitalGain,mean)
+cor(b$Age,b$hoursPerWeek)   #corelation
+
+plot(b$Age,b$hoursPerWeek)
+boxplot(b$Age)
+hist(b$Age)
+plot(density(b$Age)) #density plot
+pie(b$CapitalGain)
+pie(b$CapitalLoss)   #pie chart
+
+# Modeling
+b = lm(b$CapitalLoss~b$Age)
+library(car)
+vif(b)
+outlierTest(b)
+
+# Output
+write.csv(b)
+png("piechart.png")
+
+
+######################### Other extra functions from different sources
+
+fix(mtcars)   # change value in editor directly!!
+
+transform(mtcars, kilometersperllitre = 0.4251 * mpg) #added kmpl column
+
+### barebones approach
+mtcars[,"gear"] <- mtcars[,"gear"]*0.4251
+mtcars[mtcars[,"am"] == 1,"wt"]
+
+tapply(mtcars$mpg,mtcars$gear,mean)       #tapply on mpg, grouped by gears
+aggregate(mpg~gear,mtcars,mean)         #same as tapply but returns dataframe
+
+# difference between %in% and ==
+5 %in% 3:8
+5 == 3:8
+
+# change row names of anscombe table
+anscombe
+rownames(anscombe) <- paste("this_row_is" , 1:11 ,sep = "#")
+
+# plotting data
+x.coord <- c(2,3,7)
+y.coord <- c(2.5,4.5,9)
+plot(x.coord,y.coord,xlab = "x axis lable",xlim = c(0,11),ylim = c(0,12),ylab = "y axis lable",main = "Graph Title")
+new.line.x.coord <- c(2,5,9)    # 3 values passed to make 2 line segments
+new.line.y.coord <- c(8,4,7)
+lines(new.line.x.coord,new.line.y.coord)
+#add points
+new.points.x <- c(1,9,5,7)
+new.points.y <- c(4,2,10,6)
+points(new.points.x,new.points.y,col = "blue",pch = 17)
