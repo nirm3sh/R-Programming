@@ -1,0 +1,138 @@
+#1. Setting-up working directory path
+getwd()
+setwd("D:/insofe/R projects/Lab Activity basics")
+#2. Reading data in to R (practice reading data from multiple data formats tsv, csv, and excel )
+Datacsv = read.csv(file = "Data.csv",header = T,sep = ",")
+
+Datatxt<-read.table("Data.txt",header=T,sep="\t") 
+library(XLConnect) 
+wb<-loadWorkbook("Data.xls")
+sheet<-readWorksheet(wb,"Data",header=T)
+
+# 3. Understanding the data
+# a. No. of records
+# b. No. of attributes
+# c. Data type of each attribute
+dim(Datacsv)
+str(Datacsv)
+names(Datacsv)
+
+listDtypes = c()
+for (i in 1:ncol(smplData))
+{
+  listDtypes[i] = class(smplData[,i])
+}
+
+#4. Identifying missing values in a data frame
+totNAValues = sum(is.na.data.frame(Datacsv))
+
+#5. Dropping missing the records with missing values
+cmpltData <- subset(Datacsv,subset = complete.cases(Datacsv))
+cmpltData1 <- na.omit(Datacsv)
+
+#6. Generating summary statistics of data
+summary(Datacsv)
+
+# 7. Performing data sub setting operations
+# a. Column names wise (selecting few columns/dropping few columns)
+# b. Row wise
+# c. With the help of element positions
+# d. By conditions
+
+Datacsv[2,4]
+Datacsv[3:7,5:9]
+Datacsv[,7]
+Datacsv[12,]
+
+rm()
+
+DataSub1 = subset(Datacsv,select = c(1,3,4))
+DataSub11 = subset(Datacsv,select = -c(1,3,4))
+DataSub2 = subset(Datacsv,select = c(1,3,4))[2:11,]
+
+DataSub3 = subset(Datacsv,(Datacsv["Age"] > 60))
+
+# 8. Creating new attribute with the help of â€˜For loopâ€™ and â€˜if-elseâ€™
+
+smplData = na.omit(Datacsv)
+ 
+ for (i in 1:(nrow(smplData)))
+ {
+   if(smplData[i,"Age"] > 65)
+     {
+       smplData[i,"newAttribute1"] = "Old Aged" 
+     }
+   else if (smplData[i,"Age"] < 35)
+     {
+     smplData[i,"newAttribute1"] = "Young Aged"
+     }
+   else
+     {
+     smplData[i,"newAttribute1"] = "Middle Aged"
+     }
+ }
+
+
+# 9. Apply functions
+# a. Write a function to sum the values in a vector
+# b. Subset the given data with numeric attributes
+# c. With the help of the function you written, apply the summation operation for each column
+
+smplvec = runif(7,0,10)
+smplvec = rnorm(7,10,5)
+smplvec = as.integer(smplvec)
+
+summm <- function(x)
+{
+  tot = 0
+  for (i in 1:length(x))
+    {
+      tot = tot + x[i]
+    }
+return (tot)
+}
+
+summm(smplvec)
+
+
+nums <- sapply(smplData,is.numeric)
+attriNumData = smplData[,nums]
+
+nums <- lapply(smplData,is.numeric)
+nums <- apply(smplData,2,is.numeric)
+
+apply(attriNumData,2,FUN = summm)
+attriNumData[is.na(attriNumData)] <- 0
+apply(attriNumData,2,FUN = summm)
+
+
+# 10. Practice â€˜reshapeâ€™ library
+# a. Using â€˜Occupationâ€™ and â€˜Sexâ€ and cast the data by Occupation~sex
+# b. Melt the data generated in above point
+
+library(reshape)
+meltData = melt(smplData,na.rm = T,id.vars = "Sex")
+meltData = melt(smplData,na.rm = T,id.vars = "Sex","Occupation")
+
+castData = cast(data = meltData,Sex~variable,value="value")
+castData = cast(data = meltData,variable~Sex,value="value",fill = 0)
+
+
+# 11. Consider one â€œAGEâ€ attribute in the data and compute descriptive statistics 
+#(range, mean median, variance, standard deviation, quartiles, interquartile range, box plot, histogram)
+
+Datacsv = na.omit(Datacsv)
+range(Datacsv$Age)
+mean(Datacsv$Age)
+median(Datacsv$Age)
+var(Datacsv$Age)
+sd(Datacsv$Age)
+quantile(Datacsv$Age)
+IQR(Datacsv$Age)
+
+boxplot(smplData$Age)
+hist(smplData$Age,)
+
+# 12. Introducing â€˜Deducerâ€™
+# a. Reading and writing data
+# b. Plotting visualizations
