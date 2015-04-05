@@ -1,0 +1,249 @@
+getwd()
+setwd("D:/insofe/self projects/Airline Assignment/WorkingDir")
+
+##### 1. Read the Airfares data in R
+require(XLConnect)
+xlwb = loadWorkbook(filename = "Airfares.xls")
+xlsheet = readWorksheet(object = xlwb,sheet = 2,header = T)
+
+AirfareTable = xlsheet
+
+unCleanAirfareTable = read.csv(file = "Airfares2.csv",sep = ",",header = T)
+summary(unCleanAirfareTable)
+
+##### 2. Find the dimensions of the data and report the data types.
+##### Check if R is reading the data type as desired. If not then convert it to the right data type.
+
+AFDim = dim(AirfareTable)
+
+airSummary = summary(AirfareTable)
+
+dataTypeVec = c()
+for(i in 1:18){
+  dataTypeVec[i] = class(AirfareTable[,i])  
+}
+
+##### 3.The missing value is denoted as *. Identify how many missing values are there in data. 
+##### If ignored, how many records will be lost. Find the subset of data where you have complete data.
+
+totNAValues = sum(is.na.data.frame(AirfareTable)) #No NA values in data
+
+totMissingValues = sum(AirfareTable[] == "*")
+
+# TO count the number of * in all columns
+for (i in 1:18){
+  colMissing[i] = sum(AirfareTable[,i] == "*") 
+}
+
+completeAirData = subset(AirfareTable,AirfareTable[,1] != "*" & AirfareTable[,3] != "*")
+
+
+## writeWorksheet(object = "Airfares.xls",data = is.data.frame(completeAirData),sheet = "3")
+##write.table(x = completeAirData,file = "Airfares1.xls")
+write.csv(completeAirData,"Airfares1.csv")
+
+
+##### 4. Clean the data: remove any special characters in the data and check if the data types are consistent.
+# While importing from excel sheet into tables, the special characters are ignored
+# and all data is consistent. Also while exporting to csv the data is consistent.
+
+View(unCleanAirfareTable)
+
+#Factor colums need to be changed to char and numeric
+unCleanAirfareTable$S_CODE = as.character(unCleanAirfareTable$S_CODE)
+unCleanAirfareTable$E_CODE = as.character(unCleanAirfareTable$E_CODE)
+
+# Remove special character "*" from columns 1 and 3
+for (i in 1:nrow(unCleanAirfareTable)){
+  if(unCleanAirfareTable[i,1] == "*"){unCleanAirfareTable[i,1] = ""}
+}
+for (i in 1:nrow(unCleanAirfareTable)){
+  if(unCleanAirfareTable[i,3] == "*"){unCleanAirfareTable[i,3] = ""}
+}
+
+#Remove Last column X
+unCleanAirfareTable[,ncol(unCleanAirfareTable)] = as.character(unCleanAirfareTable$X)
+unCleanAirfareTable = subset(unCleanAirfareTable,select = 1:18)
+
+#Remove comma and dollar sign in S_INCOME and E_INCOME
+
+unCleanAirfareTable$S_INCOME = as.character(unCleanAirfareTable$S_INCOME)
+unCleanAirfareTable$S_INCOME = substr(unCleanAirfareTable$S_INCOME,start = 2,stop = (nrow(unCleanAirfareTable)))
+unCleanAirfareTable$S_INCOME = gsub(pattern = ",",replacement = "",unCleanAirfareTable$S_INCOME)
+
+unCleanAirfareTable$E_INCOME = as.character(unCleanAirfareTable$E_INCOME)
+unCleanAirfareTable$E_INCOME = substr(unCleanAirfareTable$E_INCOME,start = 2,stop = (nrow(unCleanAirfareTable)))
+unCleanAirfareTable$E_INCOME = gsub(pattern = ",",replacement = "",unCleanAirfareTable$E_INCOME)
+
+unCleanAirfareTable$FARE = substr(unCleanAirfareTable$FARE,start = 2,stop = (nrow(unCleanAirfareTable)))
+
+View(unCleanAirfareTable)
+
+write.csv(unCleanAirfareTable,"uncleantoclean.csv")
+##### 5. What is the average fare if the city is a vacation destination when compared to if the city is not a vacation destination
+
+
+vacYesTable = subset(x = AirfareTable,AirfareTable$VACATION == "Yes")
+avgFareVacDest = mean(vacYesTable$FARE)
+
+vacNoTable = subset(x = AirfareTable,AirfareTable$VACATION == "No")
+avgFareNotVacDest = mean(vacNoTable$FARE)
+
+##### 6. The cities columns have both city and state names. Split them into city and state names
+
+strvec = AirfareTable$S_CITY
+S_CITY_STATE = substr(x = strvec,start = (nchar(strvec)-2),stop = nchar(strvec))
+AirfareTable$S_CITY = strtrim(x = AirfareTable$S_CITY,width = (nchar(AirfareTable$S_CITY)-2))
+
+strvec2 = AirfareTable$E_CITY
+E_CITY_STATE = substr(strvec2,start = (nchar(strvec2)-2),stop = nchar(strvec2))
+AirfareTable$E_CITY = strtrim(x = AirfareTable$E_CITY,width = (nchar(AirfareTable$E_CITY)-2))
+
+AirfareTable[,"S_STATE"] <- S_CITY_STATE
+AirfareTable[,"E_STATE"] <- E_CITY_STATE
+
+AirfareTable = AirfareTable[c(1,2,19,3,4,20,5:18)]
+
+##### 7. How does the average fare differ if the slot is free or controlled
+
+freeSlotData = subset(AirfareTable,AirfareTable$SLOT == "Free")
+avgFareFreeSlot = mean(freeSlotData$FARE)
+
+controlledSlotData = subset(AirfareTable,AirfareTable$SLOT == "Controlled")
+avgFareControlledSlot = mean(controlledSlotData$FARE)
+
+##### 8. How does the average fare differ if the gate is free or constrained.
+
+freeGateData = subset(AirfareTable,AirfareTable$GATE == "Free")
+avgFareFreeGate = mean(freeGateData$FARE)
+
+constrainedGateData = subset(AirfareTable,AirfareTable$GATE == "Constrained")
+avgFareConstrainedGate = mean(constrainedGateData$FARE)
+
+##### 9. Does the average fare vary by starting city or by destination city
+
+sCityVector = unique(c(AirfareTable[,"S_CITY"]))
+totSCity = length(sCityVector) #51 unique s_city
+eCityVector = unique(c(AirfareTable[,"E_CITY"]))
+totECity = length(eCityVector) #68 unique e_city
+
+sCityFare = rep(0,totSCity)
+eCityFare = rep(0,totECity)
+countSCitiesIndividually = rep(0,totSCity)
+countECitiesIndividually = rep(0,totECity)
+
+
+for (i in 1:totSCity)
+{
+  for (j in 1:638)
+  {
+    if (sCityVector[i] == AirfareTable[j,"S_CITY"])
+    {
+      sCityFare[i] = sCityFare[i] + AirfareTable$FARE[j]
+      countSCitiesIndividually[i] = countSCitiesIndividually[i] + 1
+    }
+  }  
+}
+
+
+
+for (i in 1:totECity)
+{
+  for (j in 1:638)
+  {
+    if (eCityVector[i] == AirfareTable[j,"E_CITY"])
+    {
+      eCityFare[i] = eCityFare[i] + AirfareTable$FARE[j]
+      countECitiesIndividually[i] = countECitiesIndividually[i] + 1      
+    }
+  }  
+}
+
+temp1 = round((sCityFare/countSCitiesIndividually),0)
+temp2 = round((eCityFare/countECitiesIndividually),0)
+sCityAvgFareData = cbind(sCityVector,temp1)
+eCityAvgFareData = cbind(eCityVector,temp2)
+
+
+M = data.frame(sCityAvgFareData) 
+N = data.frame(eCityAvgFareData)
+
+colnames(M) <- c("S_CITY","Start Average Fare")
+colnames(N) <- c("E_CITY", "End Average Fare")
+
+K = merge(M,N,by.x = "S_CITY",by.y = "E_CITY")
+
+colnames(K) <- c("City","StartAverageFare","EndAverageFare")
+
+K$City = as.character(K$City)
+K$StartAverageFare = as.character(K$StartAverageFare)
+K$StartAverageFare = as.numeric(K$StartAverageFare)
+K$EndAverageFare = as.character(K$EndAverageFare)
+K$EndAverageFare = as.numeric(K$EndAverageFare)
+
+#Calculate average fare for a city (start or end)
+
+# S_State_Vector = sort(unique(S_CITY_STATE))
+# E_State_Vector = sort(unique(E_CITY_STATE))
+# 
+# ORfare = rep(0,length(E_State_Vector))
+# 
+# for (i in 1:(length(E_State_Vector)))
+# {
+#   for(j in 1:nrow(AirfareTable))
+#   {
+#     if((AirfareTable[j,"S_STATE"] == E_State_Vector[i]) | (AirfareTable[j,"E_STATE"] == E_State_Vector[i]))
+#     {
+#       ORfare[i] = AirfareTable[j,"FARE"]
+#     }
+#   }
+# }
+
+sCityVector = sort(unique(sCityVector))
+eCityVector = sort(unique(eCityVector))
+
+S_E_CITY = sort(unique(c(sCityVector,eCityVector)))
+
+ORfare = rep(0,length(S_E_CITY))
+counter = rep(0,length(S_E_CITY)) 
+
+for (i in 1:(length(S_E_CITY)))
+{
+  for(j in 1:nrow(AirfareTable))
+  {
+    if((AirfareTable[j,"S_CITY"] == S_E_CITY[i]) | (AirfareTable[j,"E_CITY"] == S_E_CITY[i]))
+    {
+      ORfare[i] = ORfare[i] + AirfareTable[j,"FARE"]
+      counter[i] = counter[i] + 1
+    }
+  }
+}
+
+AvgORFare = rep(0,length(ORfare))
+for(i in 1:length(ORfare))
+{
+  AvgORFare[i] = (ORfare[i]/counter[i])
+}
+
+AvgORFare = round(AvgORFare,2)
+S_E_Fare = cbind(S_E_CITY,AvgORFare)
+
+View(S_E_Fare)
+
+library(Deducer)
+library(ggplot2)
+
+ggplot(data = K,aes(x = K$City,y = K$StartAverageFare)) + geom_bar(stat = "identity")
+ggplot(data = K,aes(x = K$City,y = K$EndAverageFare)) + geom_bar(stat = "identity")
+
+qplot(K$StartAverageFare,K$EndAverageFare,data=K,colour=K$City,geom="point",group=K$City)
+
+# qplot(x = K$StartAverageFare,y=K$EndAverageFare,data = K,color = "green")
+# qplot(x = K$City,y=K$StartAverageFare,data = K,col = "red")
+# qplot(x = K$City,y=K$EndAverageFare,data = K,col = "yellow")
+# 
+# plot(x = K$StartAverageFare,y = K$EndAverageFare,col="blue")
+# 
+# par(pch =10, col="brown")
+# plot(K$StartAverageFare, K$EndAverageFare)
+# lines(K$StartAverageFare, K$EndAverageFare)
