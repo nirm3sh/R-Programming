@@ -1,0 +1,61 @@
+### 50functions in R Part 2
+getwd()
+setwd("D:/insofe/R projects/Self study/50functions in R Part 2")
+
+read.csv("sample.csv")$Occupation     #read only one column
+
+# functions within a function
+gsub(pattern = "-",replacement = "*********",as.character(read.csv("sample.csv")$Occupation))
+
+# %in% can be used inplace of == if there are NA in the data
+a = read.csv("sample.csv")
+a <- head(a)
+13 %in% a$hoursPerWeek
+13 %in% a$hoursPerWeek[2]
+
+# sampling with probability
+sample(c("Maximum","Medium","Minimum"),size = 2,prob = c(.7,.2,.1))
+
+# generate a random integer
+round(runif(1,1,100))
+
+# random number sequence that can be remembered
+set.seed(7) ; runif(5)  #everytime the sequence of random numbers is same so that u can share it with others
+
+# dynamically create different objects according to a pattern using the assign function
+# this can be seen as key-value
+for(i in 1:3)
+{
+  varname <- paste("positive.numbers.with", i, "digits", sep =".")
+  x <- ( 10^(i-1) ):( (10^i)-1 )
+  assign(varname,x)
+}
+positive.numbers.with.1.digits
+positive.numbers.with.2.digits
+positive.numbers.with.3.digits
+
+# dynamically retrieve different objects according to a pattern using the get function
+x<- c("abc","def","ghijkl")
+data(mtcars)
+for (i in ls()) print(get(i))
+
+# ifelse different from if else
+something <- "False"
+something <- c("True","False","True")
+
+if(something)
+  {
+    print ("Value of something is : True")
+  }else
+      {
+        print("Value of something is : False")
+      }
+
+ifelse(something,"Value of something is : True","Value of something is : False")
+
+# corelation 
+cor(mtcars$mpg,mtcars$hp)
+
+# when you want to keep string vectors and not change to factors while converting it to dataframe
+bnames <- read.csv("bnames.csv", stringsAsFactors = FALSE) ## here bnames dataframe will have string as datatype
+str(bnames)
