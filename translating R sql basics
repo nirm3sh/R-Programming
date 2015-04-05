@@ -1,0 +1,35 @@
+getwd()
+setwd("D:/insofe/R projects/Sqldf - plyr/translating_r_sql_basics")
+
+attributes(CO2)
+class(CO2)
+
+myCO2 <- CO2
+attributes(myCO2) <- attributes(CO2)[
+  c("names", "row.names", "class")]
+class(myCO2) <- "data.frame"
+
+colnames(myCO2)
+library(sqldf)
+s01 <- head(sqldf("select Type,conc from myCO2"))
+r01 <- head(subset(myCO2,select = c("Type","conc")))
+r01b <- head(myCO2[,c("Type","conc")])
+
+all.equal(r01,r01b)
+
+sqldf("select * from myCO2 where uptake < 20")
+myCO2[myCO2[,"uptake"] < 20,]
+
+#Inside the with call the columns of the data frame named in the first argument can be used as objects.  
+#In this example uptake is used directly instead of pulling that column out of the data frame.
+with(myCO2,myCO2[uptake < 20,]) #Inside the with call the columns of the data frame named in the first argument can be used as objects.  
+#In this example uptake is used directly instead of pulling that column out of the data frame.
+
+sqldf("select * from myCO2 where uptake < 20 and Type='Quebec'")
+myCO2[myCO2[,"uptake"] < 20 & myCO2[,"Type"] == 'Quebec',]
+with(myCO2,myCO2[uptake < 20 & Type == 'Quebec',])
+
+sqldf("select * from myCO2 limit 7")
+myCO2[1:7,]
+
+c("he's", 'he\'s', "she has \"it\"") #quotes usage and backslash (\)
